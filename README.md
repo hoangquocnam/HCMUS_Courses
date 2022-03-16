@@ -1,2 +1,5 @@
-"# HCMUS_Courses" 
-<h1> This is my Repo helping me handle projects / labs / experiments in my uni. </h1>
+<h1>The Knight'tour Algorithm</h1>
+
+<h3>Backtracking</h3>
+
+<h3>Warnsdorff's heuristic</h3>
