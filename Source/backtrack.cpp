@@ -70,7 +70,6 @@ bool checkNextMove(int size, int **board, int current_pos_x, int current_pos_y, 
                 return true;
             }
             board[next_y][next_x] = -1;
-            moves--;
         }
     }
     return false;

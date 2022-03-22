@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#include<fstream>
+#include <fstream>
 #include <cstring>
 using namespace std;
 
@@ -61,18 +61,20 @@ int heuristic(int size, int *board, int pos_x, int pos_y)
     return count;
 }
 
-bool checkNextMove(int size, int *board, int &pos_x, int &pos_y)
+bool checkNextMove(int size, int *board, int &pos_x, int &pos_y, long long &moves)
 {
     int min_index = -1;
-    int min_heuristic = size + 1;
-    for (int i = 0; i < size; i++)
+    int min_heuristic = size * size;
+    int start = rand() % 8;
+    for (int i = 0; i < 8; i++)
     {
-        int next_x = pos_x + MOVE_OF_KNIGHT[i][0];
-        int next_y = pos_y + MOVE_OF_KNIGHT[i][1];
+        int index = (start + i) % 8;
+        int next_x = pos_x + MOVE_OF_KNIGHT[index][0];
+        int next_y = pos_y + MOVE_OF_KNIGHT[index][1];
         int next_heuristic = heuristic(size, board, next_x, next_y);
         if (isSafe(size, board, next_x, next_y) && next_heuristic < min_heuristic)
         {
-            min_index = i;
+            min_index = index;
             min_heuristic = next_heuristic;
         }
     }
@@ -83,6 +85,7 @@ bool checkNextMove(int size, int *board, int &pos_x, int &pos_y)
     }
 
     board[(pos_y + MOVE_OF_KNIGHT[min_index][1]) * size + (pos_x + MOVE_OF_KNIGHT[min_index][0])] = board[pos_y * size + pos_x] + 1;
+    moves++;
 
     pos_x += MOVE_OF_KNIGHT[min_index][0];
     pos_y += MOVE_OF_KNIGHT[min_index][1];
@@ -90,14 +93,31 @@ bool checkNextMove(int size, int *board, int &pos_x, int &pos_y)
     return true;
 }
 
-bool solve(int size, int *board, int x, int y, long long moves)
+bool isAllCheck(int size, int *board)
 {
-    board[y * size + x] = 1;
-    for (int i = 0; i < size * size - 1; i++)
+    for (int i = 0; i < size * size; i++)
     {
-        if (!checkNextMove(size, board, x, y))
+        if (board[i] == -1)
         {
             return false;
+        }
+    }
+    return true;
+}
+
+bool solve(int size, int *board, int x, int y, long long &moves)
+{
+    while (!isAllCheck(size, board))
+    {
+        for (int i = 0; i < size * size; i++)
+        {
+            board[i] = -1;
+        }
+        moves = 0;
+        board[y * size + x] = 1;
+        for (int i = 0; i < size * size - 1; i++)
+        {
+            checkNextMove(size, board, x, y, moves);
         }
     }
 
@@ -120,15 +140,17 @@ void measure(int size, int *board, int posX, int posY)
 
 int main(int argc, char *argv[])
 {
+    srand(time(NULL));
     clock_t start, end;
     int x = atoi(argv[2]);
     int y = atoi(argv[4]);
     int size = atoi(argv[6]);
     int *board = new int[size * size];
-    for (int  i = 0; i < size * size;i++){
+    for (int i = 0; i < size * size; i++)
+    {
         board[i] = -1;
     }
-    
+
     measure(size, board, x, y);
     delete board;
     board = nullptr;
