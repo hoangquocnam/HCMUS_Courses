@@ -21,11 +21,11 @@ to setup
   set id-highlighted 0
   set FIFO []
   set LIFO []
-  ask patches [set pcolor black]
+  ask patches [set pcolor lime + 2]
   set running_done false
 end
 
-to go-BFS
+to BFS
   if not any? vertices [
     user-message "You need first to create a graph to do this activity"
     stop
@@ -43,8 +43,8 @@ end
 to run-BFS
   ask first FIFO [
     foreach sort-by [ [?x ?y] -> [who] of ?x < [who] of ?y ] link-neighbors with [color != orange][ ?x ->
-
-      ask ?x [
+      if running_done = false[
+        ask ?x [
         set color orange
         set FIFO lput ?x FIFO
         ask first FIFO [
@@ -53,18 +53,27 @@ to run-BFS
             set thickness 1
             output-print (word ([who] of end1 + 1) " -> " ([who] of end2 + 1))
           ]
-        ]]
+        ]
+        if goal? = true [
+          set running_done true
+        ]
+      ]
+
+      ]
     ]
   ]
   set FIFO but-first FIFO
   if empty? FIFO [
     set running_done true
+  ]
+  if running_done = true[
     stop
   ]
+
   if not empty? FIFO [run-BFS]
 end
 
-to go-DFS
+to DFS
   if not any? vertices [
     user-message "You need first to create a graph to do this activity"
     stop
@@ -94,10 +103,16 @@ to run-DFS
           output-print (word ([who] of end1 + 1) " -> " ([who] of end2 + 1))
         ]
       ]
-       ]
+
+      if goal? = true[
+        set running_done true;
+      ]
+    ]
   ]
   if empty? LIFO [
     set running_done true
+  ]
+  if running_done = true[
     stop
   ]
   if not empty? LIFO [run-DFS]
@@ -112,7 +127,6 @@ to reset
   ask links [set thickness 0 set color grey]
   ask turtles with [root?] [set color blue + 2]
   if running_done = true [
-    ask turtles with [root?] [set root? false]
     set running_done false
   ]
   ask turtles with [root? = false] [set color yellow set size 3 set root? false]
@@ -283,21 +297,21 @@ to pick-goal
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-567
-24
-992
-450
+697
+30
+1438
+772
 -1
 -1
-12.64
+22.21212121212121
 1
 10
 1
 1
 1
 0
-1
-1
+0
+0
 1
 -16
 16
@@ -332,7 +346,7 @@ BUTTON
 80
 298
 NIL
-go-BFS
+BFS
 NIL
 1
 T
@@ -349,7 +363,7 @@ BUTTON
 82
 353
 NIL
-go-DFS
+DFS
 NIL
 1
 T
