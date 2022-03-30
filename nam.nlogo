@@ -295,6 +295,144 @@ to pick-goal
   ]
 
 end
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+to set-up-A*
+  clear-all ;; clear everything (the view and all the variables)
+  create-source-and-destination
+end
+
+
+
+to create-source-and-destination
+  ask one-of patches with [pcolor = black]
+  [
+    set pcolor blue
+    set plabel "source"
+    sprout 1
+    [
+      set color red
+      pd
+    ]
+  ]
+  ask one-of patches with [pcolor = black]
+  [
+    set pcolor green
+    set plabel "destination"
+  ]
+end
+
+
+to draw-maze
+  if mouse-inside?
+    [
+      ask patch mouse-xcor mouse-ycor
+      [
+        sprout 1
+        [
+          set shape "square"
+          die
+        ]
+      ]
+
+      ;draw obstacles
+      if Select-element = "obstacles"
+      [
+        if mouse-down?
+        [
+          if [pcolor] of patch mouse-xcor mouse-ycor = black or [pcolor] of patch mouse-xcor mouse-ycor = brown or [pcolor] of patch mouse-xcor mouse-ycor = yellow
+          [
+            ask patch mouse-xcor mouse-ycor
+            [
+              set pcolor white
+            ]
+          ]
+        ]
+      ]
+
+      ;erase obstacles
+      if Select-element = "erase obstacles"
+      [
+        if mouse-down?
+        [
+          if [pcolor] of patch mouse-xcor mouse-ycor = white
+          [
+            ask patch mouse-xcor mouse-ycor
+            [
+              set pcolor black
+            ]
+          ]
+        ]
+      ]
+
+      ;draw source patch
+      if Select-element = "source"
+      [
+        if mouse-down?
+        [
+          let m-xcor mouse-xcor
+          let m-ycor mouse-ycor
+          if [plabel] of patch m-xcor m-ycor != "destination"
+          [
+            ask patches with [plabel = "source"]
+            [
+              set pcolor black
+              set plabel ""
+            ]
+            ask turtles
+            [
+              die
+            ]
+            ask patch m-xcor m-ycor
+            [
+              set pcolor blue
+              set plabel "source"
+              sprout 1
+              [
+                set color red
+                pd
+              ]
+            ]
+          ]
+        ]
+      ]
+
+      ;draw destination patch
+      if Select-element = "destination"
+        [
+          if mouse-down?
+            [
+              let m-xcor mouse-xcor
+              let m-ycor mouse-ycor
+
+              if [plabel] of patch m-xcor m-ycor != "source"
+              [
+                ask patches with [plabel = "destination"]
+                [
+                  set pcolor black
+                  set plabel ""
+                ]
+                ask patch m-xcor m-ycor
+                [
+                  set pcolor green
+                  set plabel "destination"
+                ]
+              ]
+            ]
+        ]
+    ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 697
@@ -511,6 +649,50 @@ BUTTON
 NIL
 reset
 NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+119
+651
+206
+684
+NIL
+set-up-A*
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+CHOOSER
+240
+410
+378
+455
+Select-element
+Select-element
+"obstacles" "square" "erase obstacles" "source" "destination"
+2
+
+BUTTON
+232
+496
+325
+529
+NIL
+draw-maze\n
+T
 1
 T
 OBSERVER
