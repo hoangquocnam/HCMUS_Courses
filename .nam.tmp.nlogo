@@ -611,7 +611,6 @@ to load-maze
   [
     ifelse (item (length name_file_load - 1) name_file_load = "g" and item (length name_file_load - 2) name_file_load = "n" and item (length name_file_load - 3) name_file_load = "p" and item (length name_file_load - 4) name_file_load = ".")
     [
-      save-maze
       clear-all
       import-pcolors name_file_load
       ifelse count patches with [pcolor = blue] = 1 and count patches with [pcolor = green] = 1
@@ -931,10 +930,10 @@ NIL
 1
 
 BUTTON
-15
-483
-102
-516
+1460
+94
+1569
+127
 NIL
 set-up-A*
 NIL
@@ -948,20 +947,20 @@ NIL
 1
 
 CHOOSER
-12
-414
-194
-459
+1458
+32
+1640
+77
 Select-element
 Select-element
 "obstacles" "erase obstacles" "source" "destination"
 0
 
 BUTTON
-16
-538
-109
-571
+1461
+143
+1554
+176
 NIL
 draw-maze\n
 T
@@ -975,10 +974,10 @@ NIL
 1
 
 BUTTON
-17
-593
-105
-626
+1587
+95
+1675
+128
 NIL
 clear-view
 NIL
@@ -992,10 +991,10 @@ NIL
 1
 
 BUTTON
-17
-643
-106
-676
+1705
+23
+1876
+100
 NIL
 A*
 NIL
@@ -1019,10 +1018,10 @@ NIL
 1
 
 BUTTON
-17
-694
-171
-727
+1719
+330
+1831
+363
 NIL
 load-maze\n
 NIL
@@ -1036,21 +1035,21 @@ NIL
 1
 
 INPUTBOX
-227
-411
-462
-471
+1457
+243
+1692
+303
 name_file_save
-asdasd.png
+demo.png
 1
 0
 String
 
 BUTTON
-231
-497
-323
-530
+1721
+255
+1831
+288
 NIL
 save-maze
 NIL
@@ -1064,12 +1063,12 @@ NIL
 1
 
 INPUTBOX
-335
-641
-580
-701
+1457
+321
+1696
+381
 name_file_load
-bun.png
+demo.png
 1
 0
 String
