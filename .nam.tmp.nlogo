@@ -30,11 +30,12 @@ to create-source-and-destination
   ask one-of patches with [pcolor =  blue + 2]
   [
     set plabel "source"
+    set pcolor magenta
     sprout 1
     [
       set color red
       set shape icon
-      set size 2
+      set size 3
       pd
     ]
   ]
@@ -166,7 +167,7 @@ to clear-view
     [
       set color red
       set shape icon
-      set size 2
+      set size 3
       pd
     ]
   ]
@@ -174,6 +175,7 @@ end
 
 to A*
   reset-ticks
+  clear-view
   ask one-of turtles
   [
     move-to one-of patches with [plabel = "source"]
@@ -297,7 +299,7 @@ to load-maze
     [
       clear-all
       import-pcolors name_file_load
-      ifelse count patches with [pcolor = blue] = 1 and count patches with [pcolor = green] = 1
+      ifelse count patches with [pcolor = red] = 1 and count patches with [pcolor = green] = 1
       [
         ask patches
         [
@@ -307,7 +309,7 @@ to load-maze
         [
           die
         ]
-        ask one-of patches with [pcolor = blue]
+        ask one-of patches with [pcolor = red]
         [
           set plabel "source"
           sprout 1
@@ -347,7 +349,7 @@ to clear-unwanted-elements
   [
     ask patches with [pcolor = brown or pcolor = yellow  ]
     [
-      set pcolor black
+      set pcolor blue + 2
     ]
   ]
   if any? patches with [pcolor = blue]
@@ -373,6 +375,7 @@ end
 
 to BFS
   reset-ticks
+
   set FIFO []
   set FIFO lput one-of patches with [plabel = "source"] FIFO
 
@@ -413,9 +416,10 @@ to-report run-BFS
       ]
       report path-to-destination
     ]
+
     ask current-patch[
       set pcolor brown
-      ask neighbors4 with [pcolor != white and not member? self BFSpath and pxcor >= min-pxcor and pycor >= min-pycor and pxcor <= max-pxcor and pycor <= max-pycor ][
+      ask neighbors4 with [pcolor != white and pcolor != yellow and not member? self BFSpath and pxcor >= min-pxcor and pycor >= min-pycor and pxcor <= max-pxcor and pycor <= max-pycor ][
         set parent-patch current-patch
         set FIFO lput self FIFO
         set pcolor yellow
@@ -427,7 +431,6 @@ to-report run-BFS
   report BFSpath
 
 end
-
 
 to DFS
   reset-ticks
@@ -491,7 +494,7 @@ to UCS
   ask one-of turtles
   [
     move-to one-of patches with [plabel = "source"]
-    set path find-a-path one-of patches with [plabel = "source"] one-of patches with [plabel = "destination"]
+    set path run-UCS one-of patches with [plabel = "source"] one-of patches with [plabel = "destination"]
     set optimal-path path
     set current-path path
   ]
@@ -538,7 +541,7 @@ to-report run-UCS [ source-patch destination-patch]
               set pcolor 45
               set open lput self open
               set parent-patch current-patch
-              set g (random 100
+              set g random 10
               set f (g)
             ]
           ]
