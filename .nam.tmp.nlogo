@@ -485,6 +485,96 @@ to-report run-DFS
   report DFSpath
 
 end
+
+to UCS
+  reset-ticks
+  ask one-of turtles
+  [
+    move-to one-of patches with [plabel = "source"]
+    set path find-a-path one-of patches with [plabel = "source"] one-of patches with [plabel = "destination"]
+    set optimal-path path
+    set current-path path
+  ]
+  output-show (word "Shortest path length : " length optimal-path)
+  move
+end
+
+
+to-report run-UCS [ source-patch destination-patch]
+
+  let search-done? false
+  let search-path []
+  let current-patch 0
+  set open []
+  set closed []
+  ask source-patch[
+  ]
+
+
+  set open lput source-patch open
+
+  while [ search-done? != true]
+  [
+    ifelse length open != 0
+    [
+      set open sort-by [[?1 ?2 ] -> [f] of ?1 < [f] of ?2] open
+
+      set current-patch item 0 open
+      set open remove-item 0 open
+
+      set closed lput current-patch closed
+
+      ask current-patch
+      [
+        ifelse any? neighbors4 with [ (pxcor = [ pxcor ] of destination-patch) and (pycor = [pycor] of destination-patch)]
+        [
+          set search-done? true
+        ]
+        [
+          ask neighbors4 with [ pcolor != white and (not member? self closed) and (self != parent-patch) ]
+          [
+            if not member? self open and self != source-patch and self != destination-patch
+            [
+              set pcolor 45
+              set open lput self open
+              set parent-patch current-patch
+              set g (random 100
+              set f (g)
+            ]
+          ]
+        ]
+        if self != source-patch
+        [
+          set pcolor 35
+        ]
+      ]
+    ]
+    [
+      user-message( "A path from the source to the destination does not exist." )
+      report []
+    ]
+  ]
+
+  set search-path lput current-patch search-path
+  let temp first search-path
+  while [ temp != source-patch ]
+  [
+    ask temp
+    [
+      set pcolor 85
+    ]
+    set search-path lput [parent-patch] of temp search-path
+    set temp [parent-patch] of temp
+  ]
+
+  set search-path fput destination-patch search-path
+
+  set search-path reverse search-path
+
+  report search-path
+end
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 663
@@ -538,7 +628,7 @@ CHOOSER
 icon
 icon
 "turtle" "person" "box" "car" "cow"
-3
+0
 
 BUTTON
 176
@@ -569,9 +659,9 @@ Select-element
 
 BUTTON
 179
-98
+97
 285
-136
+135
 Edit
 draw-maze\n
 T
@@ -685,12 +775,29 @@ tam.png
 String
 
 BUTTON
-1548
-285
-1711
-377
+1592
+235
+1762
+318
 NIL
 DFS
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1594
+353
+1762
+424
+NIL
+UCS\n
 NIL
 1
 T
