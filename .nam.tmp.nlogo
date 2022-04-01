@@ -7,16 +7,16 @@ globals [
 ]
 
 turtles-own [
-  path ; the optimal path from source to destination
-  current-path ; part of the path that is left to be traversed
+  path
+  current-path
 ]
 
 patches-own
 [
-  parent-patch ; patch's predecessor
-  f ; the value of knowledge plus heuristic cost function f()
-  g ; the value of knowledge cost function g()
-  h ; the value of heuristic cost function h()
+  parent-patch
+  f
+  g
+  h
 ]
 
 to set-up
@@ -101,7 +101,7 @@ to draw-maze
           [
             ask patches with [plabel = "source"]
             [
-              set pcolor black
+              set pcolor blue + 2
               set plabel ""
             ]
             ask turtles
@@ -110,11 +110,13 @@ to draw-maze
             ]
             ask patch m-xcor m-ycor
             [
-              set pcolor blue
+              set pcolor magenta
               set plabel "source"
               sprout 1
               [
                 set color red
+                set shape icon
+                set size 3
                 pd
               ]
             ]
@@ -134,7 +136,7 @@ to draw-maze
               [
                 ask patches with [plabel = "destination"]
                 [
-                  set pcolor black
+                  set pcolor blue + 2
                   set plabel ""
                 ]
                 ask patch m-xcor m-ycor
@@ -150,7 +152,7 @@ end
 
 to clear-view
   cd
-  ask patches with[ plabel != "source" and plabel != "destination" ]
+  ask patches with[pcolor = yellow or pcolor = brown or pcolor = black or pcolor = cyan]
   [
     set pcolor blue + 2
   ]
@@ -179,15 +181,14 @@ to A*
   ask one-of turtles
   [
     move-to one-of patches with [plabel = "source"]
-    set path find-a-path one-of patches with [plabel = "source"] one-of patches with [plabel = "destination"]
+    set path run-A* one-of patches with [plabel = "source"] one-of patches with [plabel = "destination"]
     set optimal-path path
     set current-path path
   ]
-  output-show (word "Shortest path length : " length optimal-path)
   move
 end
 
-to-report find-a-path [ source-patch destination-patch]
+to-report run-A* [ source-patch destination-patch]
 
   let search-done? false
   let search-path []
@@ -299,7 +300,7 @@ to load-maze
     [
       clear-all
       import-pcolors name_file_load
-      ifelse count patches with [pcolor = red] = 1 and count patches with [pcolor = green] = 1
+      ifelse count patches with [pcolor = magenta] = 1 and count patches with [pcolor = green] = 1
       [
         ask patches
         [
@@ -309,12 +310,14 @@ to load-maze
         [
           die
         ]
-        ask one-of patches with [pcolor = red]
+        ask one-of patches with [pcolor = magenta]
         [
           set plabel "source"
           sprout 1
           [
             set color red
+            set shape icon
+            set size 3
             pd
           ]
         ]
@@ -345,25 +348,25 @@ to save-maze
 end
 
 to clear-unwanted-elements
-  if any? patches with [pcolor = brown or pcolor = yellow  ]
+  if any? patches with [pcolor = brown or pcolor = yellow or pcolor = black]
   [
-    ask patches with [pcolor = brown or pcolor = yellow  ]
+    ask patches with [pcolor = brown or pcolor = yellow or pcolor = black ]
     [
       set pcolor blue + 2
     ]
   ]
-  if any? patches with [pcolor = blue]
+  if any? patches with [plabel ="source"]
   [
-    ask one-of patches with [pcolor = blue]
+    ask one-of patches with [plabel ="source"]
     [
-      set plabel ""
+      set pcolor magenta
     ]
   ]
-  if any? patches with [pcolor = green]
+  if any? patches with [plabel ="destination"]
   [
-    ask one-of patches with [pcolor = green]
+    ask one-of patches with [plabel ="destination"]
     [
-      set plabel ""
+      set pcolor green
     ]
   ]
   clear-drawing
@@ -375,7 +378,7 @@ end
 
 to BFS
   reset-ticks
-
+  clear-view
   set FIFO []
   set FIFO lput one-of patches with [plabel = "source"] FIFO
 
@@ -419,21 +422,26 @@ to-report run-BFS
 
     ask current-patch[
       set pcolor brown
-      ask neighbors4 with [pcolor != white and pcolor != yellow and not member? self BFSpath and pxcor >= min-pxcor and pycor >= min-pycor and pxcor <= max-pxcor and pycor <= max-pycor ][
+      ask neighbors4 with [pcolor != white and pcolor != yellow and not member? self BFSpath and pxcor >= min-pxcor and pycor >= min-pycor and pxcor <= max-pxcor and pycor <= max-pycor][
         set parent-patch current-patch
         set FIFO lput self FIFO
         set pcolor yellow
+        if plabel = "destination" [
+          set pcolor green
+        ]
       ]
 
     ]
 
   ]
-  report BFSpath
+  user-message( "A path from the source to the destination does not exist." )
+  report path-to-destination
 
 end
 
 to DFS
   reset-ticks
+  clear-view
   set LIFO []
   set LIFO lput one-of patches with [plabel = "source"] LIFO
 
@@ -450,6 +458,7 @@ end
 to-report run-DFS
   let DFSpath []
   let path-to-destination []
+  let temp []
   ask first LIFO [
     set parent-patch first LIFO
   ]
@@ -480,17 +489,22 @@ to-report run-DFS
         set parent-patch current-patch
         set LIFO fput self LIFO
         set pcolor yellow
+        if plabel = "destination" [
+          set pcolor green
+        ]
       ]
 
     ]
 
   ]
-  report DFSpath
+  user-message( "A path from the source to the destination does not exist." )
+  report path-to-destination
 
 end
 
 to UCS
   reset-ticks
+  clear-view
   ask one-of turtles
   [
     move-to one-of patches with [plabel = "source"]
@@ -498,10 +512,8 @@ to UCS
     set optimal-path path
     set current-path path
   ]
-  output-show (word "Shortest path length : " length optimal-path)
   move
 end
-
 
 to-report run-UCS [ source-patch destination-patch]
 
@@ -520,7 +532,7 @@ to-report run-UCS [ source-patch destination-patch]
   [
     ifelse length open != 0
     [
-      set open sort-by [[?1 ?2 ] -> [f] of ?1 < [f] of ?2] open
+      set open sort-by [[?1 ?2 ] -> [g] of ?1 < [g] of ?2] open
 
       set current-patch item 0 open
       set open remove-item 0 open
@@ -541,8 +553,7 @@ to-report run-UCS [ source-patch destination-patch]
               set pcolor 45
               set open lput self open
               set parent-patch current-patch
-              set g random 10
-              set f (g)
+              set g[g] of parent-patch + random 10
             ]
           ]
         ]
@@ -576,14 +587,12 @@ to-report run-UCS [ source-patch destination-patch]
 
   report search-path
 end
-
-
 @#$#@#$#@
 GRAPHICS-WINDOW
-663
-89
-1247
-674
+593
+20
+1363
+791
 -1
 -1
 18.6
@@ -596,10 +605,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--15
-15
--15
-15
+-20
+20
+-20
+20
 0
 0
 1
@@ -630,8 +639,8 @@ CHOOSER
 71
 icon
 icon
-"turtle" "person" "box" "car" "cow"
-0
+"turtle" "person" "box" "car" "cow" "wolf" "triangle" "truck" "start"
+5
 
 BUTTON
 176
@@ -658,7 +667,7 @@ CHOOSER
 Select-element
 Select-element
 "obstacles" "erase obstacles" "source" "destination"
-0
+1
 
 BUTTON
 179
@@ -722,10 +731,10 @@ NIL
 1
 
 BUTTON
-269
-808
-382
-857
+271
+260
+384
+309
 NIL
 load-maze\n
 NIL
@@ -739,10 +748,10 @@ NIL
 1
 
 INPUTBOX
-14
-722
-254
-782
+16
+174
+256
+234
 name_file_save
 tam.png
 1
@@ -750,10 +759,10 @@ tam.png
 String
 
 BUTTON
-270
-729
-380
-781
+272
+181
+382
+233
 NIL
 save-maze
 NIL
@@ -767,10 +776,10 @@ NIL
 1
 
 INPUTBOX
-14
-799
-253
-859
+16
+251
+255
+311
 name_file_load
 tam.png
 1
@@ -811,42 +820,17 @@ NIL
 NIL
 1
 
+CHOOSER
+16
+329
+154
+374
+Levels
+Levels
+"level 1" "level 2" "level 3"
+0
+
 @#$#@#$#@
-## WHAT IS IT?
-
-(a general understanding of what the model is trying to show or explain)
-
-## HOW IT WORKS
-
-(what rules the agents use to create the overall behavior of the model)
-
-## HOW TO USE IT
-
-(how to use the model, including a description of each of the items in the Interface tab)
-
-## THINGS TO NOTICE
-
-(suggested things for the user to notice while running the model)
-
-## THINGS TO TRY
-
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
-
-## EXTENDING THE MODEL
-
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
-
-## CREDITS AND REFERENCES
-
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
 @#$#@#$#@
 default
 true
