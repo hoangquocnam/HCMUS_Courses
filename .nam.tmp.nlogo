@@ -25,28 +25,59 @@ to set-up
 end
 
 to create-source-and-destination
-
+  if Levels = "level 1"[
   ask patches [set pcolor  blue + 2]
-  ask one-of patches with [pcolor =  blue + 2]
-  [
-    set plabel "source"
-    set pcolor magenta
-    sprout 1
+    ask one-of patches with [pcolor =  blue + 2]
     [
-      set color red
-      set shape icon
-      set size 3
-      pd
+      set plabel "source"
+      set pcolor magenta
+      sprout 1
+      [
+        set color red
+        set shape icon
+        set size 3
+      ]
+    ]
+
+
+
+    ask one-of patches with [pcolor =  blue + 2]
+    [
+      set pcolor green
+      set plabel "destination"
     ]
   ]
 
+  if Levels = "level 2"[
+    ask patches [set pcolor  blue + 2]
+    ask one-of patches with [pcolor =  blue + 2]
+    [
+      set plabel "source"
+      set pcolor magenta
+      sprout 1
+      [
+        set color red
+        set shape icon
+        set size 3
+
+      ]
+    ]
 
 
-  ask one-of patches with [pcolor =  blue + 2]
-  [
-    set pcolor green
-    set plabel "destination"
+
+    ask one-of patches with [pcolor =  blue + 2]
+    [
+      set pcolor green
+      set plabel "destination 1"
+    ]
+
+    ask one-of patches with [pcolor =  blue + 2 and plabel != "destination 1"]
+    [
+      set pcolor green
+      set plabel "destination 2"
+    ]
   ]
+
 end
 
 to draw-maze
@@ -117,7 +148,7 @@ to draw-maze
                 set color red
                 set shape icon
                 set size 3
-                pd
+
               ]
             ]
           ]
@@ -161,34 +192,41 @@ to clear-view
     ask turtles with [color = red] [die]
     set pcolor green
   ]
+  ask patches with[ plabel = "destination 1" ] [
+    ask turtles with [color = red] [die]
+    set pcolor green
+  ]
+  ask patches with[ plabel = "destination 2" ] [
+    ask turtles with [color = red] [die]
+    set pcolor green
+  ]
 
   ask one-of patches with [plabel = "source" ]
   [
     set plabel "source"
+    set pcolor magenta
     sprout 1
     [
       set color red
       set shape icon
       set size 3
-      pd
+
     ]
   ]
 end
 
-to A*
-  reset-ticks
+to A* [source-patch destination-patch]
   clear-view
   ask one-of turtles
   [
-    move-to one-of patches with [plabel = "source"]
-    set path run-A* one-of patches with [plabel = "source"] one-of patches with [plabel = "destination"]
+    set path run-A* one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
   ]
-  move
+  move source-patch destination-patch
 end
 
-to-report run-A* [ source-patch destination-patch]
+to-report run-A* [source-patch destination-patch]
 
   let search-done? false
   let search-path []
@@ -260,12 +298,12 @@ to-report run-A* [ source-patch destination-patch]
   report search-path
 end
 
-to move
+to move [source-patch destination-patch]
   ask one-of turtles
   [
     while [length current-path != 0]
     [
-      go-to-next-patch-in-current-path
+      go-to-next-patch-in-current-path source-patch destination-patch
       pd
       wait 0.05
     ]
@@ -273,17 +311,18 @@ to move
     [
       pu
     ]
+    pd
   ]
 end
 
-to go-to-next-patch-in-current-path
+to go-to-next-patch-in-current-path [source-patch destination-patch]
   face first current-path
   repeat 10
   [
     fd 0.1
   ]
   move-to first current-path
-  if [plabel] of patch-here != "source" and  [plabel] of patch-here != "destination"
+  if [plabel] of patch-here != source-patch and  [plabel] of patch-here != destination-patch
   [
     ask patch-here
     [
@@ -376,23 +415,21 @@ to clear-unwanted-elements
   ]
 end
 
-to BFS
-  reset-ticks
+to BFS [source-patch destination-patch]
   clear-view
   set FIFO []
-  set FIFO lput one-of patches with [plabel = "source"] FIFO
+  set FIFO lput one-of patches with [plabel = source-patch] FIFO
 
   ask one-of turtles
   [
-    move-to one-of patches with [plabel = "source"]
-    set path run-BFS
+    set path run-BFS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
   ]
-  move
+  move source-patch destination-patch
 end
 
-to-report run-BFS
+to-report run-BFS [source-patch destination-patch]
   let BFSpath []
   let path-to-destination []
   ask first FIFO [
@@ -406,7 +443,7 @@ to-report run-BFS
     if not member? current-patch BFSpath[
       set BFSpath lput current-patch BFSpath
     ]
-    if [plabel] of current-patch = "destination"
+    if [plabel] of current-patch = [plabel] of destination-patch
     [
       set current-patch [parent-patch] of current-patch
       while [current-patch != [parent-patch] of current-patch] [
@@ -422,11 +459,12 @@ to-report run-BFS
 
     ask current-patch[
       set pcolor brown
+
       ask neighbors4 with [pcolor != white and pcolor != yellow and not member? self BFSpath and pxcor >= min-pxcor and pycor >= min-pycor and pxcor <= max-pxcor and pycor <= max-pycor][
         set parent-patch current-patch
         set FIFO lput self FIFO
         set pcolor yellow
-        if plabel = "destination" [
+        if plabel = [plabel] of destination-patch [
           set pcolor green
         ]
       ]
@@ -439,23 +477,21 @@ to-report run-BFS
 
 end
 
-to DFS
-  reset-ticks
+to DFS [source-patch destination-patch]
   clear-view
   set LIFO []
-  set LIFO lput one-of patches with [plabel = "source"] LIFO
+  set LIFO lput one-of patches with [plabel = source-patch] LIFO
 
   ask one-of turtles
   [
-    move-to one-of patches with [plabel = "source"]
-    set path run-DFS
+    set path run-DFS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
   ]
-  move
+  move source-patch destination-patch
 end
 
-to-report run-DFS
+to-report run-DFS [source-patch destination-patch]
   let DFSpath []
   let path-to-destination []
   let temp []
@@ -470,7 +506,7 @@ to-report run-DFS
     if not member? current-patch DFSpath[
       set DFSpath lput current-patch DFSpath
     ]
-    if [plabel] of current-patch = "destination"
+    if [plabel] of current-patch = [plabel] of destination-patch
     [
       set current-patch [parent-patch] of current-patch
       while [current-patch != [parent-patch] of current-patch] [
@@ -489,7 +525,7 @@ to-report run-DFS
         set parent-patch current-patch
         set LIFO fput self LIFO
         set pcolor yellow
-        if plabel = "destination" [
+        if plabel = [plabel] of destination-patch [
           set pcolor green
         ]
       ]
@@ -502,17 +538,15 @@ to-report run-DFS
 
 end
 
-to UCS
-  reset-ticks
+to UCS [source-patch destination-patch]
   clear-view
   ask one-of turtles
   [
-    move-to one-of patches with [plabel = "source"]
-    set path run-UCS one-of patches with [plabel = "source"] one-of patches with [plabel = "destination"]
+    set path run-UCS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
   ]
-  move
+  move source-patch destination-patch
 end
 
 to-report run-UCS [ source-patch destination-patch]
@@ -587,6 +621,31 @@ to-report run-UCS [ source-patch destination-patch]
 
   report search-path
 end
+
+to run-level
+  if Levels = "level 1" [
+    if Algorithm = "A*" [A* "source" "destination"]
+    if Algorithm = "BFS" [BFS  "source" "destination"]
+    if Algorithm = "DFS" [DFS  "source" "destination"]
+    if Algorithm = "UCS" [UCS  "source" "destination"]
+
+  ]
+  if Levels = "level 2" [
+
+    let temp (random 4)
+    if temp = 0 [A* "source" "destination 1"]
+    if temp = 1 [BFS"source" "destination 1"]
+    if temp = 2 [DFS "source" "destination 1"]
+    if temp = 3 [UCS "source" "destination 1"]
+    wait 0.5
+    set temp (random 4)
+    if temp = 0 [A* "destination 1" "destination 2"]
+    if temp = 1 [BFS "destination 1" "destination 2"]
+    if temp = 2 [DFS "destination 1" "destination 2"]
+    if temp = 3 [UCS "destination 1" "destination 2"]
+  ]
+  if Levels = "level 3" []
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 593
@@ -615,23 +674,6 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
-BUTTON
-1592
-129
-1762
-204
-NIL
-BFS
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 CHOOSER
 13
 26
@@ -639,8 +681,8 @@ CHOOSER
 71
 icon
 icon
-"turtle" "person" "box" "car" "cow" "wolf" "triangle" "truck" "start"
-5
+"turtle" "person" "box" "car" "cow" "wolf" "triangle" "truck" "star"
+2
 
 BUTTON
 176
@@ -667,7 +709,7 @@ CHOOSER
 Select-element
 Select-element
 "obstacles" "erase obstacles" "source" "destination"
-1
+0
 
 BUTTON
 179
@@ -693,23 +735,6 @@ BUTTON
 65
 Reset
 clear-view
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1590
-28
-1761
-105
-NIL
-A*
 NIL
 1
 T
@@ -786,49 +811,42 @@ tam.png
 0
 String
 
-BUTTON
-1592
-235
-1762
-318
-NIL
-DFS
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1594
-353
-1762
-424
-NIL
-UCS\n
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 CHOOSER
-16
+23
 329
-154
+161
 374
 Levels
 Levels
 "level 1" "level 2" "level 3"
 0
+
+CHOOSER
+18
+397
+156
+442
+Algorithm
+Algorithm
+"A*" "BFS" "DFS" "UCS"
+1
+
+BUTTON
+1511
+377
+1649
+447
+NIL
+run-level\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 @#$#@#$#@
