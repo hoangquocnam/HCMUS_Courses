@@ -333,6 +333,7 @@ to go-to-next-patch-in-current-path [source-patch destination-patch]
 end
 
 to load-maze
+
   if name_file_load != false
   [
     ifelse (item (length name_file_load - 1) name_file_load = "g" and item (length name_file_load - 2) name_file_load = "n" and item (length name_file_load - 3) name_file_load = "p" and item (length name_file_load - 4) name_file_load = ".")
@@ -408,6 +409,7 @@ to clear-unwanted-elements
       set pcolor green
     ]
   ]
+
   clear-drawing
   ask turtles
   [
@@ -459,7 +461,9 @@ to-report run-BFS [source-patch destination-patch]
 
     ask current-patch[
       set pcolor brown
-
+      if plabel = [plabel] of source-patch [
+        set pcolor magenta
+      ]
       ask neighbors4 with [pcolor != white and pcolor != yellow and not member? self BFSpath and pxcor >= min-pxcor and pycor >= min-pycor and pxcor <= max-pxcor and pycor <= max-pycor][
         set parent-patch current-patch
         set FIFO lput self FIFO
@@ -521,6 +525,9 @@ to-report run-DFS [source-patch destination-patch]
     ]
     ask current-patch[
       set pcolor brown
+      if plabel = [plabel] of source-patch [
+        set pcolor magenta
+      ]
       ask neighbors4 with [pcolor != white and not member? self DFSpath and pxcor >= min-pxcor and pycor >= min-pycor and pxcor <= max-pxcor and pycor <= max-pycor ][
         set parent-patch current-patch
         set LIFO fput self LIFO
@@ -623,7 +630,7 @@ to-report run-UCS [ source-patch destination-patch]
 end
 
 to run-level
-  if Levels = "level 1" [
+    if Levels = "level 1" [
     if Algorithm = "A*" [A* "source" "destination"]
     if Algorithm = "BFS" [BFS  "source" "destination"]
     if Algorithm = "DFS" [DFS  "source" "destination"]
@@ -682,7 +689,7 @@ CHOOSER
 icon
 icon
 "turtle" "person" "box" "car" "cow" "wolf" "triangle" "truck" "star"
-2
+6
 
 BUTTON
 176
@@ -812,14 +819,14 @@ tam.png
 String
 
 CHOOSER
-23
+18
 329
-161
+156
 374
 Levels
 Levels
 "level 1" "level 2" "level 3"
-0
+1
 
 CHOOSER
 18
