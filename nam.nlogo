@@ -48,6 +48,7 @@ to create-source-and-destination
     [
       set pcolor green
       set plabel "destination"
+
     ]
   ]
 
@@ -250,6 +251,11 @@ to A* [source-patch destination-patch]
     set path run-A* one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+  ]
+  wait 1
+  ask patches with[pcolor = yellow or pcolor = brown]
+  [
+    set pcolor blue + 2
   ]
   move source-patch destination-patch
 end
@@ -471,6 +477,11 @@ to BFS [source-patch destination-patch]
     set optimal-path path
     set current-path path
   ]
+  wait 1
+  ask patches with[pcolor = yellow or pcolor = brown]
+  [
+    set pcolor blue + 2
+  ]
   move source-patch destination-patch
 end
 
@@ -537,6 +548,12 @@ to DFS [source-patch destination-patch]
     set optimal-path path
     set current-path path
   ]
+  wait 1
+  ask patches with[pcolor = yellow or pcolor = brown]
+  [
+    set pcolor blue + 2
+  ]
+
   move source-patch destination-patch
 end
 
@@ -597,6 +614,11 @@ to UCS [source-patch destination-patch]
     set path run-UCS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+  ]
+  wait 1
+  ask patches with[pcolor = yellow or pcolor = brown]
+  [
+    set pcolor blue + 2
   ]
   move source-patch destination-patch
 end
@@ -689,7 +711,7 @@ to run-level
     if temp = 1 [BFS"source" "destination 1"]
     if temp = 2 [DFS "source" "destination 1"]
     if temp = 3 [UCS "source" "destination 1"]
-    wait 0.5
+    wait 1
     set temp (random 4)
     if temp = 0 [A* "destination 1" "destination 2"]
     if temp = 1 [BFS "destination 1" "destination 2"]
@@ -884,7 +906,7 @@ CHOOSER
 Levels
 Levels
 "level 1" "level 2" "level 3"
-2
+1
 
 CHOOSER
 18
@@ -894,14 +916,14 @@ CHOOSER
 Algorithm
 Algorithm
 "A*" "BFS" "DFS" "UCS"
-2
+0
 
 BUTTON
-1513
-377
-1651
-447
-NIL
+1415
+331
+1641
+437
+RUN
 run-level\n
 NIL
 1
@@ -914,10 +936,10 @@ NIL
 1
 
 SLIDER
-31
-507
-203
-540
+17
+467
+189
+500
 Number_of_agents
 Number_of_agents
 1
