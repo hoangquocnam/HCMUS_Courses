@@ -9,6 +9,8 @@ globals [
 turtles-own [
   path
   current-path
+
+
 ]
 
 patches-own
@@ -17,6 +19,7 @@ patches-own
   f
   g
   h
+  algorithm_own
 ]
 
 to set-up
@@ -26,7 +29,7 @@ end
 
 to create-source-and-destination
   if Levels = "level 1"[
-  ask patches [set pcolor  blue + 2]
+    ask patches [set pcolor  blue + 2]
     ask one-of patches with [pcolor =  blue + 2]
     [
       set plabel "source"
@@ -77,6 +80,39 @@ to create-source-and-destination
       set plabel "destination 2"
     ]
   ]
+
+  if Levels = "level 3"[
+
+    ask patches [set pcolor  blue + 2]
+    let index 1
+    while [index <= number_of_agents][
+
+      ask one-of patches with [pcolor =  blue + 2 and pcolor != magenta]
+      [
+        set plabel index
+        set pcolor magenta
+        sprout 1
+        [
+          set color red
+          set shape icon
+          set size 3
+        ]
+
+      ]
+      set index index + 1
+
+    ]
+
+
+
+
+    ask one-of patches with [pcolor =  blue + 2]
+    [
+      set pcolor green
+      set plabel "destination"
+    ]
+  ]
+
 
 end
 
@@ -181,29 +217,21 @@ to draw-maze
     ]
 end
 
-to clear-view
+to clear-view [source destination]
   cd
-  ask patches with[pcolor = yellow or pcolor = brown or pcolor = black or pcolor = cyan]
+  ask patches with[pcolor = yellow or pcolor = black or pcolor = brown or pcolor = cyan]
   [
     set pcolor blue + 2
   ]
 
-  ask patches with[ plabel = "destination" ] [
-    ask turtles with [color = red] [die]
-    set pcolor green
-  ]
-  ask patches with[ plabel = "destination 1" ] [
-    ask turtles with [color = red] [die]
-    set pcolor green
-  ]
-  ask patches with[ plabel = "destination 2" ] [
+  ask patches with[ plabel = destination] [
     ask turtles with [color = red] [die]
     set pcolor green
   ]
 
-  ask one-of patches with [plabel = "source" ]
+  ask one-of patches with [plabel = source ]
   [
-    set plabel "source"
+    set plabel source
     set pcolor magenta
     sprout 1
     [
@@ -216,7 +244,7 @@ to clear-view
 end
 
 to A* [source-patch destination-patch]
-  clear-view
+  clear-view source-patch destination-patch
   ask one-of turtles
   [
     set path run-A* one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
@@ -433,7 +461,7 @@ to clear-unwanted-elements
 end
 
 to BFS [source-patch destination-patch]
-  clear-view
+  clear-view source-patch destination-patch
   set FIFO []
   set FIFO lput one-of patches with [plabel = source-patch] FIFO
 
@@ -483,9 +511,11 @@ to-report run-BFS [source-patch destination-patch]
         set parent-patch current-patch
         set FIFO lput self FIFO
         set pcolor yellow
+
         if plabel = [plabel] of destination-patch [
           set pcolor green
         ]
+
       ]
 
     ]
@@ -497,7 +527,7 @@ to-report run-BFS [source-patch destination-patch]
 end
 
 to DFS [source-patch destination-patch]
-  clear-view
+  clear-view source-patch destination-patch
   set LIFO []
   set LIFO lput one-of patches with [plabel = source-patch] LIFO
 
@@ -561,7 +591,7 @@ to-report run-DFS [source-patch destination-patch]
 end
 
 to UCS [source-patch destination-patch]
-  clear-view
+  clear-view source-patch destination-patch
   ask one-of turtles
   [
     set path run-UCS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
@@ -645,7 +675,7 @@ to-report run-UCS [ source-patch destination-patch]
 end
 
 to run-level
-    if Levels = "level 1" [
+  if Levels = "level 1" [
     if Algorithm = "A*" [A* "source" "destination"]
     if Algorithm = "BFS" [BFS  "source" "destination"]
     if Algorithm = "DFS" [DFS  "source" "destination"]
@@ -666,7 +696,37 @@ to run-level
     if temp = 2 [DFS "destination 1" "destination 2"]
     if temp = 3 [UCS "destination 1" "destination 2"]
   ]
-  if Levels = "level 3" []
+  if Levels = "level 3" [
+    let index 1
+    while [index <= number_of_agents][
+      let temp (random 4)
+      if temp = 0 [A* index "destination"]
+      if temp = 1 [BFS index "destination"]
+      if temp = 2 [DFS index "destination"]
+      if temp = 3 [UCS index "destination"]
+      set index index + 1
+    ]
+  ]
+end
+
+
+to reset
+  if Levels = "level 1" [
+    clear-view "source" "destination"
+
+  ]
+  if Levels = "level 2" [
+    clear-view "source" "destination 1"
+    clear-view "destination 1" "destination 2"
+
+  ]
+  if Levels = "level 3" [
+    let index 1
+    while [index <= number_of_agents][
+      clear-view index "destination"
+      set index index + 1
+    ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -704,13 +764,13 @@ CHOOSER
 icon
 icon
 "turtle" "person" "box" "car" "cow" "wolf" "triangle" "truck" "star"
-6
+0
 
 BUTTON
-176
-30
-285
-63
+172
+28
+281
+61
 Set up
 set-up\n
 NIL
@@ -734,30 +794,13 @@ Select-element
 0
 
 BUTTON
-179
-97
-285
-135
+173
+101
+279
+139
 Edit
 draw-maze\n
 T
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-306
-29
-409
-65
-Reset
-clear-view
-NIL
 1
 T
 OBSERVER
@@ -835,31 +878,63 @@ String
 
 CHOOSER
 18
-329
+331
 156
-374
+376
 Levels
 Levels
 "level 1" "level 2" "level 3"
-1
+2
 
 CHOOSER
 18
-397
+399
 156
-442
+444
 Algorithm
 Algorithm
 "A*" "BFS" "DFS" "UCS"
-3
+2
 
 BUTTON
-1511
+1513
 377
-1649
+1651
 447
 NIL
 run-level\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+31
+507
+203
+540
+Number_of_agents
+Number_of_agents
+1
+50
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+305
+29
+406
+62
+NIL
+reset
 NIL
 1
 T
