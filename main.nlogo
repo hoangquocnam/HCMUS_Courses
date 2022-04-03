@@ -29,8 +29,8 @@ end
 
 to create-source-and-destination
   if Levels = "level 1"[
-    ask patches [set pcolor  blue + 2]
-    ask one-of patches with [pcolor =  blue + 2]
+    ask patches [set pcolor  blue + 3]
+    ask one-of patches with [pcolor =  blue + 3]
     [
       set plabel "source"
       set pcolor magenta
@@ -44,7 +44,7 @@ to create-source-and-destination
 
 
 
-    ask one-of patches with [pcolor =  blue + 2]
+    ask one-of patches with [pcolor =  blue + 3]
     [
       set pcolor green
       set plabel "destination"
@@ -53,8 +53,8 @@ to create-source-and-destination
   ]
 
   if Levels = "level 2"[
-    ask patches [set pcolor  blue + 2]
-    ask one-of patches with [pcolor =  blue + 2]
+    ask patches [set pcolor  blue + 3]
+    ask one-of patches with [pcolor =  blue + 3]
     [
       set plabel "source"
       set pcolor magenta
@@ -69,26 +69,21 @@ to create-source-and-destination
 
 
 
-    ask one-of patches with [pcolor =  blue + 2]
+    ask one-of patches with [pcolor =  blue + 3 and plabel != "source"]
     [
       set pcolor green
-      set plabel "destination 1"
+      set plabel "destination"
     ]
 
-    ask one-of patches with [pcolor =  blue + 2 and plabel != "destination 1"]
-    [
-      set pcolor green
-      set plabel "destination 2"
-    ]
   ]
 
   if Levels = "level 3"[
 
-    ask patches [set pcolor  blue + 2]
+    ask patches [set pcolor  blue + 3]
     let index 1
     while [index <= number_of_agents][
 
-      ask one-of patches with [pcolor =  blue + 2 and pcolor != magenta]
+      ask one-of patches with [pcolor =  blue + 3 and pcolor != magenta]
       [
         set plabel index
         set pcolor magenta
@@ -107,7 +102,7 @@ to create-source-and-destination
 
 
 
-    ask one-of patches with [pcolor =  blue + 2]
+    ask one-of patches with [pcolor =  blue + 3 and pcolor != magenta]
     [
       set pcolor green
       set plabel "destination"
@@ -133,7 +128,7 @@ to draw-maze
       [
         if mouse-down?
         [
-          if [pcolor] of patch mouse-xcor mouse-ycor = blue + 2 or [pcolor] of patch mouse-xcor mouse-ycor = brown or [pcolor] of patch mouse-xcor mouse-ycor = yellow
+          if [pcolor] of patch mouse-xcor mouse-ycor = blue + 3 or [pcolor] of patch mouse-xcor mouse-ycor = brown or [pcolor] of patch mouse-xcor mouse-ycor = yellow
           [
             ask patch mouse-xcor mouse-ycor
             [
@@ -152,14 +147,14 @@ to draw-maze
           [
             ask patch mouse-xcor mouse-ycor
             [
-              set pcolor blue + 2
+              set pcolor blue + 3
             ]
           ]
         ]
       ]
 
       ;draw source patch
-      if Select-element = "source"
+      if Select-element = "source" and Levels != "level 3"
       [
         if mouse-down?
         [
@@ -169,7 +164,7 @@ to draw-maze
           [
             ask patches with [plabel = "source"]
             [
-              set pcolor blue + 2
+              set pcolor blue + 3
               set plabel ""
             ]
             ask turtles
@@ -204,7 +199,7 @@ to draw-maze
               [
                 ask patches with [plabel = "destination"]
                 [
-                  set pcolor blue + 2
+                  set pcolor blue + 3
                   set plabel ""
                 ]
                 ask patch m-xcor m-ycor
@@ -220,9 +215,9 @@ end
 
 to clear-view [source destination]
   cd
-  ask patches with[pcolor = yellow or pcolor = black or pcolor = brown or pcolor = cyan]
+  ask patches with[pcolor = yellow or pcolor = black or pcolor = brown or pcolor = 26]
   [
-    set pcolor blue + 2
+    set pcolor blue + 3
   ]
 
   ask patches with[ plabel = destination] [
@@ -242,94 +237,25 @@ to clear-view [source destination]
 
     ]
   ]
-end
 
-to A* [source-patch destination-patch]
-  clear-view source-patch destination-patch
-  ask one-of turtles
-  [
-    set path run-A* one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
-    set optimal-path path
-    set current-path path
-  ]
-  wait 1
-  ask patches with[pcolor = yellow or pcolor = brown]
-  [
-    set pcolor blue + 2
-  ]
-  move source-patch destination-patch
-end
-
-to-report run-A* [source-patch destination-patch]
-
-  let search-done? false
-  let search-path []
-  let current-patch 0
-  set open []
-  set closed []
-
-  set open lput source-patch open
-
-  while [ search-done? != true]
-  [
-    ifelse length open != 0
-    [
-      set open sort-by [[?1 ?2 ] -> [f] of ?1 < [f] of ?2] open
-
-      set current-patch item 0 open
-      set open remove-item 0 open
-
-      set closed lput current-patch closed
-
-      ask current-patch
-      [
-        ifelse any? neighbors4 with [ (pxcor = [ pxcor ] of destination-patch) and (pycor = [pycor] of destination-patch)]
+  if Levels = "level 3"[
+    let count-source count patches with [pcolor >= 121 and pcolor <= 129]
+    if count-source > 1 [
+      let index 1
+      while [index <= count-source][
+        ask one-of patches with [plabel = index]
         [
-          set search-done? true
+          set plabel index
+          set pcolor magenta
+
         ]
-        [
-          ask neighbors4 with [ pcolor != white and (not member? self closed) and (self != parent-patch) ]
-          [
-            if not member? self open and self != source-patch and self != destination-patch
-            [
-              set pcolor 45
-              set open lput self open
-              set parent-patch current-patch
-              set g [g] of parent-patch  + 1
-              set h distance destination-patch
-              set f (g + h)
-            ]
-          ]
-        ]
-        if self != source-patch
-        [
-          set pcolor 35
-        ]
+        set index index + 1
+
       ]
     ]
-    [
-      user-message( "A path from the source to the destination does not exist." )
-      report []
-    ]
+
   ]
 
-  set search-path lput current-patch search-path
-  let temp first search-path
-  while [ temp != source-patch ]
-  [
-    ask temp
-    [
-      set pcolor 85
-    ]
-    set search-path lput [parent-patch] of temp search-path
-    set temp [parent-patch] of temp
-  ]
-
-  set search-path fput destination-patch search-path
-
-  set search-path reverse search-path
-
-  report search-path
 end
 
 to move [source-patch destination-patch]
@@ -374,8 +300,9 @@ to load-maze
     [
       clear-all
       import-pcolors name_file_load
-      ifelse count patches with [pcolor = magenta] = 1 and count patches with [pcolor = green] = 1
+      ifelse count patches with [pcolor = magenta] >= 1 and count patches with [pcolor = green] >= 1
       [
+
         ask patches
         [
           set plabel ""
@@ -384,17 +311,50 @@ to load-maze
         [
           die
         ]
-        ask one-of patches with [pcolor = magenta]
-        [
-          set plabel "source"
-          sprout 1
+        let count-source count patches with [pcolor >= 121 and pcolor <= 129]
+        set number_of_agents count-source
+        if count-source > 1 [
+          let index 1
+          while [index <= count-source][
+            ask one-of patches with [pcolor >= 121 and pcolor <= 129 and plabel = ""]
+            [
+              set plabel index
+              set pcolor magenta
+              sprout 1
+              [
+                set color red
+                set shape icon
+                set size 3
+              ]
+
+            ]
+            set index index + 1
+
+          ]
+
+
+
+          ask one-of patches with [pcolor = green]
           [
-            set color red
-            set shape icon
-            set size 3
-            pd
+            set plabel "destination"
           ]
         ]
+
+
+        if count-source = 1[
+          ask one-of patches with [pcolor = magenta]
+          [
+            set plabel "source"
+            sprout 1
+            [
+              set color red
+              set shape icon
+              set size 3
+              pd
+            ]
+          ]
+        ]
+
         ask one-of patches with [pcolor = green]
         [
           set plabel "destination"
@@ -426,7 +386,7 @@ to clear-unwanted-elements
   [
     ask patches with [pcolor = brown or pcolor = yellow or pcolor = black ]
     [
-      set pcolor blue + 2
+      set pcolor blue + 3
     ]
   ]
   if any? patches with [plabel ="source"]
@@ -436,6 +396,20 @@ to clear-unwanted-elements
       set pcolor magenta
     ]
   ]
+
+  let index 1
+  while [index <= number_of_agents][
+    if any? patches with [plabel ="index"]
+    [
+      ask one-of patches with [plabel ="index"]
+      [
+        set pcolor magenta
+      ]
+    ]
+    set index index + 1
+  ]
+
+
   if any? patches with [plabel ="destination"]
   [
     ask one-of patches with [plabel ="destination"]
@@ -459,6 +433,8 @@ to clear-unwanted-elements
       set pcolor green
     ]
   ]
+
+
   clear-drawing
   ask turtles
   [
@@ -480,7 +456,7 @@ to BFS [source-patch destination-patch]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
   [
-    set pcolor blue + 2
+    set pcolor blue + 3
   ]
   move source-patch destination-patch
 end
@@ -505,7 +481,7 @@ to-report run-BFS [source-patch destination-patch]
       while [current-patch != [parent-patch] of current-patch] [
         set path-to-destination fput current-patch path-to-destination
         ask current-patch[
-          set pcolor cyan
+          set pcolor 26
         ]
         set current-patch [parent-patch] of current-patch
 
@@ -551,7 +527,7 @@ to DFS [source-patch destination-patch]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
   [
-    set pcolor blue + 2
+    set pcolor blue + 3
   ]
 
   move source-patch destination-patch
@@ -578,7 +554,7 @@ to-report run-DFS [source-patch destination-patch]
       while [current-patch != [parent-patch] of current-patch] [
         set path-to-destination fput current-patch path-to-destination
         ask current-patch[
-          set pcolor cyan
+          set pcolor 26
         ]
         set current-patch [parent-patch] of current-patch
 
@@ -599,6 +575,7 @@ to-report run-DFS [source-patch destination-patch]
         ]
       ]
 
+
     ]
 
   ]
@@ -618,7 +595,7 @@ to UCS [source-patch destination-patch]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
   [
-    set pcolor blue + 2
+    set pcolor blue + 3
   ]
   move source-patch destination-patch
 end
@@ -683,7 +660,7 @@ to-report run-UCS [ source-patch destination-patch]
   [
     ask temp
     [
-      set pcolor 85
+      set pcolor 26
     ]
     set search-path lput [parent-patch] of temp search-path
     set temp [parent-patch] of temp
@@ -694,6 +671,109 @@ to-report run-UCS [ source-patch destination-patch]
   set search-path reverse search-path
 
   report search-path
+end
+
+to A* [source-patch destination-patch]
+  clear-view source-patch destination-patch
+  ask one-of turtles
+  [
+    set path run-A* one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
+    set optimal-path path
+    set current-path path
+  ]
+  wait 1
+  ask patches with[pcolor = yellow or pcolor = brown]
+  [
+    set pcolor blue + 3
+  ]
+  move source-patch destination-patch
+end
+
+to-report run-A* [source-patch destination-patch]
+
+  let search-done? false
+  let search-path []
+  let current-patch 0
+  set open []
+  set closed []
+
+  set open lput source-patch open
+
+  while [ search-done? != true]
+  [
+    ifelse length open != 0
+    [
+      set open sort-by [[?1 ?2 ] -> [f] of ?1 < [f] of ?2] open
+
+      set current-patch item 0 open
+      set open remove-item 0 open
+
+      set closed lput current-patch closed
+
+      ask current-patch
+      [
+        ifelse any? neighbors4 with [ (pxcor = [ pxcor ] of destination-patch) and (pycor = [pycor] of destination-patch)]
+        [
+          set search-done? true
+        ]
+        [
+          ask neighbors4 with [ pcolor != white and (not member? self closed) and (self != parent-patch) ]
+          [
+            if not member? self open and self != source-patch and self != destination-patch
+            [
+              set pcolor 45
+              set open lput self open
+              set parent-patch current-patch
+              set g [g] of parent-patch  + 1
+              set h distance destination-patch
+              set f (g + h)
+            ]
+          ]
+        ]
+        if self != source-patch
+        [
+          set pcolor 35
+        ]
+      ]
+    ]
+    [
+      user-message( "A path from the source to the destination does not exist." )
+      report []
+    ]
+  ]
+
+  set search-path lput current-patch search-path
+  let temp first search-path
+  while [ temp != source-patch ]
+  [
+    ask temp
+    [
+      set pcolor 26
+    ]
+    set search-path lput [parent-patch] of temp search-path
+    set temp [parent-patch] of temp
+  ]
+
+  set search-path fput destination-patch search-path
+
+  set search-path reverse search-path
+
+  report search-path
+end
+
+to reverse-path
+  ask patches with [plabel = "source"][
+    set plabel "temp"
+  ]
+
+  ask patches with [plabel = "destination"][
+    set plabel "source"
+  ]
+
+ ask patches with [plabel = "temp"][
+    set plabel "destination"
+  ]
+
 end
 
 to run-level
@@ -707,26 +787,36 @@ to run-level
   if Levels = "level 2" [
 
     let temp (random 4)
-    if temp = 0 [A* "source" "destination 1"]
-    if temp = 1 [BFS"source" "destination 1"]
-    if temp = 2 [DFS "source" "destination 1"]
-    if temp = 3 [UCS "source" "destination 1"]
+    if temp = 0 [ set Algorithm "A*" A* "source" "destination" ]
+    if temp = 1 [ set Algorithm "BFS" BFS "source" "destination" ]
+    if temp = 2 [ set Algorithm "DFS" DFS "source" "destination" ]
+    if temp = 3 [ set Algorithm "UCS" UCS "source" "destination" ]
     wait 1
-    set temp (random 4)
-    if temp = 0 [A* "destination 1" "destination 2"]
-    if temp = 1 [BFS "destination 1" "destination 2"]
-    if temp = 2 [DFS "destination 1" "destination 2"]
-    if temp = 3 [UCS "destination 1" "destination 2"]
+    let temp2 random 4
+    while [temp2 = temp] [
+      set temp2 (random 4)
+    ]
+    reverse-path
+    if temp2 = 0 [ set Algorithm "A*" A* "source" "destination" ]
+    if temp2 = 1 [ set Algorithm "BFS" BFS"source" "destination" ]
+    if temp2 = 2 [ set Algorithm "DFS" DFS "source" "destination" ]
+    if temp2 = 3 [ set Algorithm "UCS" UCS "source" "destination" ]
+    reverse-path
   ]
   if Levels = "level 3" [
     let index 1
     while [index <= number_of_agents][
       let temp (random 4)
-      if temp = 0 [A* index "destination"]
-      if temp = 1 [BFS index "destination"]
-      if temp = 2 [DFS index "destination"]
-      if temp = 3 [UCS index "destination"]
+      ask patches with [plabel = index][
+        set pcolor magenta
+      ]
+      if temp = 0 [ set Algorithm "A*" A* index "destination" ]
+      if temp = 1 [ set Algorithm "BFS" BFS index "destination" ]
+      if temp = 2 [ set Algorithm "DFS" DFS index "destination" ]
+      if temp = 3 [ set Algorithm "UCS" UCS index "destination" ]
+      clear-view index "destination"
       set index index + 1
+      wait 1
     ]
   ]
 end
@@ -738,8 +828,7 @@ to reset
 
   ]
   if Levels = "level 2" [
-    clear-view "source" "destination 1"
-    clear-view "destination 1" "destination 2"
+    clear-view "source" "destination"
 
   ]
   if Levels = "level 3" [
@@ -793,7 +882,7 @@ BUTTON
 28
 281
 61
-Set up
+SET UP
 set-up\n
 NIL
 1
@@ -813,14 +902,14 @@ CHOOSER
 Select-element
 Select-element
 "obstacles" "erase obstacles" "source" "destination"
-0
+3
 
 BUTTON
-173
-101
-279
-139
-Edit
+174
+97
+280
+135
+EDIT
 draw-maze\n
 T
 1
@@ -847,7 +936,7 @@ BUTTON
 260
 384
 309
-NIL
+LOAD MAP
 load-maze\n
 NIL
 1
@@ -865,7 +954,7 @@ INPUTBOX
 256
 234
 name_file_save
-tam.png
+level_1.png
 1
 0
 String
@@ -875,7 +964,7 @@ BUTTON
 181
 382
 233
-NIL
+SAVE MAP
 save-maze
 NIL
 1
@@ -893,36 +982,36 @@ INPUTBOX
 255
 311
 name_file_load
-tam.png
+level_1.png
 1
 0
 String
 
 CHOOSER
-18
-331
-156
-376
+1390
+27
+1595
+72
 Levels
 Levels
 "level 1" "level 2" "level 3"
-1
+0
 
 CHOOSER
-18
-399
-156
-444
+1391
+93
+1594
+138
 Algorithm
 Algorithm
 "A*" "BFS" "DFS" "UCS"
-0
+2
 
 BUTTON
-1415
-331
-1641
-437
+1393
+169
+1598
+235
 RUN
 run-level\n
 NIL
@@ -937,14 +1026,14 @@ NIL
 
 SLIDER
 17
-467
-189
-500
+339
+233
+372
 Number_of_agents
 Number_of_agents
 1
 50
-5.0
+1.0
 1
 1
 NIL
@@ -955,7 +1044,7 @@ BUTTON
 29
 406
 62
-NIL
+RESET
 reset
 NIL
 1
