@@ -452,6 +452,9 @@ to BFS [source-patch destination-patch]
     set path run-BFS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+    clear-output
+    output-print "BFS: "
+    output-print length path
   ]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
@@ -523,6 +526,9 @@ to DFS [source-patch destination-patch]
     set path run-DFS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+    clear-output
+    output-print "DFS: "
+    output-print length path
   ]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
@@ -591,6 +597,9 @@ to UCS [source-patch destination-patch]
     set path run-UCS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+    clear-output
+    output-print "UCS: "
+    output-print length path
   ]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
@@ -680,6 +689,9 @@ to A* [source-patch destination-patch]
     set path run-A* one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+    clear-output
+    output-print "A*: "
+    output-print length path
   ]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
@@ -875,7 +887,7 @@ CHOOSER
 icon
 icon
 "turtle" "person" "box" "car" "cow" "wolf" "triangle" "truck" "star"
-0
+5
 
 BUTTON
 172
@@ -1055,6 +1067,13 @@ NIL
 NIL
 NIL
 1
+
+OUTPUT
+1393
+260
+1598
+328
+11
 
 @#$#@#$#@
 @#$#@#$#@
