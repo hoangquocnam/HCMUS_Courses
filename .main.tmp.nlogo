@@ -452,6 +452,9 @@ to BFS [source-patch destination-patch]
     set path run-BFS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+    clear-output
+    output-print ": "
+    output-print length path
   ]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
@@ -523,6 +526,9 @@ to DFS [source-patch destination-patch]
     set path run-DFS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+    clear-output
+    output-print "DFS: "
+    output-print length path
   ]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
@@ -591,6 +597,9 @@ to UCS [source-patch destination-patch]
     set path run-UCS one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+    clear-output
+    output-print "UCS: "
+    output-print length path
   ]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
@@ -680,6 +689,7 @@ to A* [source-patch destination-patch]
     set path run-A* one-of patches with [plabel = source-patch] one-of patches with [plabel = destination-patch]
     set optimal-path path
     set current-path path
+    output-print length path
   ]
   wait 1
   ask patches with[pcolor = yellow or pcolor = brown]
@@ -875,14 +885,14 @@ CHOOSER
 icon
 icon
 "turtle" "person" "box" "car" "cow" "wolf" "triangle" "truck" "star"
-0
+5
 
 BUTTON
 172
 28
 281
 61
-Set up
+SET UP
 set-up\n
 NIL
 1
@@ -995,7 +1005,7 @@ CHOOSER
 Levels
 Levels
 "level 1" "level 2" "level 3"
-2
+0
 
 CHOOSER
 1391
@@ -1005,7 +1015,7 @@ CHOOSER
 Algorithm
 Algorithm
 "A*" "BFS" "DFS" "UCS"
-2
+3
 
 BUTTON
 1393
@@ -1033,7 +1043,7 @@ Number_of_agents
 Number_of_agents
 1
 50
-5.0
+1.0
 1
 1
 NIL
@@ -1044,7 +1054,7 @@ BUTTON
 29
 406
 62
-Reset
+RESET
 reset
 NIL
 1
@@ -1055,6 +1065,13 @@ NIL
 NIL
 NIL
 1
+
+OUTPUT
+1393
+260
+1598
+328
+11
 
 @#$#@#$#@
 @#$#@#$#@
