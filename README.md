@@ -1,2 +1,2 @@
-"# HCMUS_Courses" 
-<h1> This is my Repo helping me handle homeworks/ labs / experiments in my uni. </h1>
+<h1>Lab 2</h1>
+<a href = "./2022-CSC14003-20CLC-Lab02.pdf">Requirement</a>
