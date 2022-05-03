@@ -68,7 +68,9 @@ def handleAccuracies(df):
         df, testSize)
     accuracies = getAccuracies(
         maxDepths, featrue_train, label_train, feature_test, label_test)
-    print("Accuracies: ", accuracies)
+    print("----Accuracies-----")
+    for i in range(len(accuracies)):
+        print("Max depth: ", maxDepths[i], " ->  Accuracy: ", accuracies[i])
 
 
 def main():
